@@ -45,7 +45,6 @@
             height: 35px;
             width: 140px;
             background-color: rgb(220, 220, 220);
-            
             border: none;
         }
         button:hover{
@@ -117,7 +116,6 @@
         var D = new Array();
         
         submit.addEventListener("click", function(){
-            //get complex numbers as arrays [real, cplx]
             A[0] = document.querySelector("#A_re").value*1;
             A[1] = document.querySelector("#A_im").value*1;
             
@@ -129,10 +127,8 @@
 
             D[0] = document.querySelector("#D_re").value*1;
             D[1] = document.querySelector("#D_im").value*1;
-            //function goes through inputs and creates new area
             area = getArea();
             drawAll(area);
-            drawArea(area);
         }, false);
         
         clear.addEventListener("click", function(){
@@ -143,7 +139,6 @@
         }, false);
     </script>
     <script>
-        //constants for numeric operations
         var ADD = 1;
         var SUBTRACT = 2;
         var MULTIPLY = 3;
@@ -155,7 +150,7 @@
         var grid = new Grid(-3, 3, -3, 3, canvas);
         grid.draw(ctx);
         
-        //creating grid varibale and setting parameters (max values, getters...)
+        //grid constructor function
         function Grid(minX, maxX, minY, maxY, canvas){
             this.minX = minX;
             this.maxX = maxX;
@@ -169,18 +164,16 @@
                 context.save();
                 context.translate(this.centerX, this.centerY);
 
-                //x axis
                 context.beginPath();
                 context.moveTo(this.minX * this.unit_width, 0);
                 context.lineTo(this.maxX * this.unit_width, 0);
                 context.stroke();
-                //y axis
+
                 context.beginPath();
                 context.moveTo(0, this.minY * this.unit_height);
                 context.lineTo(0, this.maxY * this.unit_height);
                 context.stroke();
                 
-                //draw unit 1 on x and y
                 context.beginPath();
                 context.moveTo(this.unit_width, this.unit_height/20);
                 context.lineTo(this.unit_width, -this.unit_height/20);
@@ -206,14 +199,14 @@
         }
         
         function getArea(){
-            //get area properties
+            //lastnosti obmocja
             var startX = document.getElementById("start_re").value*1;
             var endX = document.getElementById("end_re").value*1;
             var stepX = document.getElementById("step_re").value*1;
             var startY = document.getElementById("start_im").value*1;
             var endY = document.getElementById("end_im").value*1;
             var stepY = document.getElementById("step_im").value*1;
-            //get area color
+            //barva obmocja
             var r = document.getElementById("color_r").value;
             var g = document.getElementById("color_g").value;
             var b = document.getElementById("color_b").value;
@@ -230,31 +223,6 @@
             ctx.save();
             ctx.translate(grid.centerX, grid.centerY);
             
-            //definiramo for zanke za obmcje, ki ga zelimo preslikati
-            /*
-            for(var re=area.startX; re<area.endX; re += 1/Math.log(area.endX-area.startX)){
-                for(var im=area.startY; im<area.endY; im+= 1/Math.log(area.endY-area.startY)){
-                    //definiramo naso tocko in jo preslikamo glede na A,B,C,D
-                    var Z = [re, im];
-                    // (aZ - b) / (cZ - d)
-                    var aZ = cplxCalculate(MULTIPLY, A, Z);
-                    var aZ_b = cplxCalculate(ADD, aZ, B);
-                    var cZ = cplxCalculate(MULTIPLY, C, Z);
-                    var cZ_d = cplxCalculate(ADD, cZ, D);
-                    var result = cplxCalculate(DIVIDE, aZ_b, cZ_d);
-                    
-                    //console.log(aZ, aZ_b, cZ, cZ_d, result);
-                    
-                    //draw a small circle around result point
-                    ctx.beginPath();
-                    ctx.arc(result[0]*grid.unit_width, result[1]*grid.unit_height, 2, 0, 2*Math.PI);
-                    ctx.fillStyle = area.color;
-                    ctx.fill();
-                    
-                }
-            }
-            */
-
             for(var re=area.startX; re<area.endX; re += area.stepX){
                 for(var im=area.startY; im<area.endY; im+= area.stepY){
                     //definiramo naso tocko in jo preslikamo glede na A,B,C,D
@@ -266,22 +234,15 @@
                     var cZ_d = cplxCalculate(ADD, cZ, D);
                     var result = cplxCalculate(DIVIDE, aZ_b, cZ_d);
                     
-                    //console.log(aZ, aZ_b, cZ, cZ_d, result);
-                    
-                    //draw a small circle around result point
+                    //preslikano tocko narisemo na ctx
                     ctx.beginPath();
                     ctx.arc(result[0]*grid.unit_width, result[1]*grid.unit_height, 2, 0, 2*Math.PI);
                     ctx.fillStyle = area.color;
                     ctx.fill();
                     
-                    //draw the point in the second canvas
-                    var rangeX = undefined;
-                    var rangeY = undefined;
-                    //var maxX = (Math.abs(area.startX) > Math.abs(area.endX)) ? Math.abs(area.startX) : Math.abs(area.endX);
-                    //var maxY = (Math.abs(area.startY) > Math.abs(area.endY)) ? Math.abs(area.startY) : Math.abs(area.endY);
+                    //osnovno tocko narisemo na ctx1
                     var grid1 = new Grid(-5, 5, -5, 5, canvas1);
                     grid1.draw(ctx1);
-                    //translate coordinates into pixels
                     ctx1.fillStyle = area.color;
                     gridUnit = (grid1.unit_height < grid1.unit_width) ? grid1.unit_height : grid1.unit_width;
                     var x = area.startX * gridUnit;
@@ -299,28 +260,16 @@
             }
 
             ctx.restore();
-            
             grid.draw(ctx);
         }
         
-        //function that draws original are on second canvas
-        function drawArea(area){
-            console.log("draw area");
-            var canvas1 = document.getElementById("canvas1");
-            var ctx1 = canvas1.getContext("2d");
-            
-            
-        }
-        
-        //function that sums/subtracts/multiplies/divides 2 complex numbers and returns array [real, cplx]
+        //funkcija za racunanje kompleksnih stevil
         function cplxCalculate(operator, z1, z2){
             var result = new Array();
             var z1_re = z1[0],
                 z1_im = z1[1],
                 z2_re = z2[0],
                 z2_im = z2[1];
-            
-            //console.log(z1, z1_re, z1_im, z2, z2_re, z2_im);
             
             switch(operator){
                 case ADD: 
